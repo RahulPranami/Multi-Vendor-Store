@@ -51,10 +51,15 @@ class Multi_Vendor_Store_CPT {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-        // add_action( 'init', 'store_branch_post_type', 0 );
 
 	}
 
+
+    /**
+	 * Register the custom post type for the Store Branch.
+	 *
+	 * @since    1.0.0
+	 */
     public function store_branch_post_type() {
         $labels = [
             'name'                  => _x('Store Branches', 'Post Type General Name', 'default'),
@@ -64,7 +69,7 @@ class Multi_Vendor_Store_CPT {
             'archives'              => __('Store Branch Archives', 'default'),
             'attributes'            => __('Store Branch Attributes', 'default'),
             'parent_item_colon'     => __('Parent Store Branch:', 'default'),
-            'all_items'             => __('All Store Branch', 'default'),
+            'all_items'             => __('Store Branch', 'default'),
             'add_new_item'          => __('Add New Store Branch', 'default'),
             'add_new'               => __('Add New', 'default'),
             'new_item'              => __('New Store Branch', 'default'),
@@ -94,8 +99,8 @@ class Multi_Vendor_Store_CPT {
             'hierarchical'          => false,
             'public'                => true,
             'show_ui'               => true,
-            'show_in_menu'          => true,
-            'menu_position'         => 25,
+            'show_in_menu'          => 'woocommerce',
+            'menu_position'         => 52,
             'menu_icon'             => 'dashicons-store',
             'show_in_admin_bar'     => true,
             'show_in_nav_menus'     => true,
@@ -108,7 +113,7 @@ class Multi_Vendor_Store_CPT {
         register_post_type('store_branch', $args);
     }
 
-	/**
+    /**
 	 * Register the stylesheets for the admin area.
 	 *
 	 * @since    1.0.0
