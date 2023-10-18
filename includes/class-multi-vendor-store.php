@@ -78,6 +78,7 @@ class Multi_Vendor_Store {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		$this->register_cpt();
 
 	}
 
@@ -121,6 +122,11 @@ class Multi_Vendor_Store {
 		 * side of the site.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-multi-vendor-store-public.php';
+
+		/**
+		 * The class responsible for registering custom post type.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-multi-vendor-store-cpt.php';
 
 		$this->loader = new Multi_Vendor_Store_Loader();
 
@@ -172,6 +178,21 @@ class Multi_Vendor_Store {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+	}
+
+	/**
+	 * Register custom post type and it's functionality.
+	 * of the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function register_cpt() {
+
+		$plugin_cpt = new Multi_Vendor_Store_CPT( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'init', $plugin_cpt, 'store_branch_post_type' );
 
 	}
 
