@@ -73,7 +73,14 @@ class Multi_Vendor_Store_Admin {
 		 * class.
 		 */
 
+		$current_screen = get_current_screen();
+
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/multi-vendor-store-admin.css', array(), $this->version, 'all' );
+
+		if ( 'store_branch' ===  $current_screen->post_type) {
+			// wp_enqueue_style( 'select2css', '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css' );
+			wp_enqueue_style('location', plugin_dir_url(__FILE__) . 'css/multi-vendor-store-location.css', [], $this->version );
+		}
 
 	}
 
@@ -96,7 +103,17 @@ class Multi_Vendor_Store_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/multi-vendor-store-admin.js', array( 'jquery' ), $this->version, false );
+		$current_screen = get_current_screen();
+
+		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/multi-vendor-store-admin.js', ['jquery'], $this->version, true);
+
+		if ( 'store_branch' ===  $current_screen->post_type) {
+			// wp_enqueue_script( 'select2', '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js', [ 'jquery' ], '4.0.13', true );
+			wp_enqueue_script('location', plugin_dir_url(__FILE__) . 'js/multi-vendor-store-location.js', ['jquery'], $this->version, true);
+		}
+		// wp_enqueue_script('polyfill', 'https://polyfill.io/v3/polyfill.min.js?features=default', [], $this->version, true);
+		// wp_enqueue_script('location', plugin_dir_url(__FILE__) . 'js/location.js', [], $this->version, true);
+		// wp_enqueue_script('gmap', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&libraries=places&v=weekly', [], $this->version, true);
 
 	}
 
