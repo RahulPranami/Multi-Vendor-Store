@@ -196,6 +196,7 @@ class Multi_Vendor_Store {
 		$this->loader->add_action( 'init', $plugin_cpt, 'store_branch_post_type' );
 		$this->loader->add_action( 'add_meta_boxes', $plugin_cpt, 'store_branch_metabox' );
 		$this->loader->add_action( 'save_post', $plugin_cpt, 'store_branch_meta_save' );
+		$this->loader->add_filter( 'gettext', $plugin_cpt, 'change_excerpt_label' , 10, 2 );
 
 		// $this->loader->add_action( 'wp_ajax_nopriv_get_product', $plugin_cpt, 'get_product_card' );
 		// $this->loader->add_action( 'wp_ajax_get_product', $plugin_cpt, 'get_product_card' );

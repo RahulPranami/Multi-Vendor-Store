@@ -94,7 +94,7 @@ class Multi_Vendor_Store_CPT {
 			'label'                 => __('Store Branch', 'default'),
 			'description'           => __('Branch of a Store', 'default'),
 			'labels'                => $labels,
-			'supports'              => ['title', 'editor', 'thumbnail'],
+			'supports'              => ['title', 'Description'=>'excerpt', 'thumbnail'],
 			'taxonomies'            => ['category', 'post_tag'],
 			'hierarchical'          => false,
 			'public'                => true,
@@ -200,6 +200,25 @@ class Multi_Vendor_Store_CPT {
 	function store_branch_metabox() {
 
 		add_meta_box(
+			'store_phone',
+			'Store Contact Number',
+			function ($post) {
+				$store_phone = get_post_meta($post->ID, '_store_phone', true);
+
+				ob_start();
+?>
+			<div class="store-location-meta">
+				<label for="store-phone">Store Contact Number</label>
+				<input type="number" id="store-phone" class="search-box" name="_store_phone" value="<?php echo $store_phone; ?>" />
+			</div>
+<?php
+				echo ob_get_clean();
+			},
+			'store_branch',
+			'normal'
+		);
+
+		add_meta_box(
 			'store_branch_location',
 			'Store Branch',
 			function ($post) {
@@ -219,7 +238,9 @@ class Multi_Vendor_Store_CPT {
 				<input type="text" id="store-branch-longitude" name="_store_branch_longitude" value="<?php echo $store_location_longitude ?>" readonly />
 				<ul id="fetched-locations"></ul>
 			</div>
-			<iframe src="https://www.w3schools.com" title="W3Schools Free Online Web Tutorials" height="500px" width="500px">
+			<div id='map' style='width: 100%; height: 500px;'></div>
+			<!-- <div><iframe src="https://maps.co/embed/65324da943830555545866ygud073e2" width="100%" height="600" frameborder="0" allowfullscreen></iframe></div> -->
+			<!-- <iframe src="https://www.w3schools.com" title="W3Schools Free Online Web Tutorials" height="500px" width="500px"> -->
 <?php
 				echo ob_get_clean();
 			},
@@ -251,6 +272,25 @@ class Multi_Vendor_Store_CPT {
 			'high'
 		);
 
+		add_meta_box(
+			'store_phone2',
+			'Store Contact Number',
+			function ($post) {
+				$store_phone = get_post_meta($post->ID, '_store_phone', true);
+
+				ob_start();
+?>
+			<div class="store-location-meta">
+				<label for="store-phone">Store Contact Number</label>
+				<input type="number" id="store-phone" class="search-box" name="_store_phone" value="<?php echo $store_phone; ?>" />
+			</div>
+<?php
+				echo ob_get_clean();
+			},
+			'store_branch',
+			'normal'
+		);
+
 	}
 
 	/**
@@ -263,15 +303,6 @@ class Multi_Vendor_Store_CPT {
 	{
 
 		if (isset($_POST['_store_branch_location'])) {
-
-			// $location = $this->get_location($_POST['_store_branch_location']);
-			// _store_branch_latitude
-			// error_log('261 Location : ' . print_r($location, true));
-
-			// $meta_value = sanitize_text_field($_POST['_store_branch_location']);
-			// $meta_value_latitude = sanitize_text_field($_POST['_store_branch_latitude']);
-			// $meta_value_longitude = sanitize_text_field($_POST['_store_branch_longitude']);
-			// $meta_value_fetched = sanitize_text_field($_POST['_store_branch_location_fetched']);
 			update_post_meta($post_id, '_store_branch_location', sanitize_text_field($_POST['_store_branch_location']));
 			update_post_meta($post_id, '_store_branch_location_latitude', sanitize_text_field($_POST['_store_branch_latitude']));
 			update_post_meta($post_id, '_store_branch_location_longitude', sanitize_text_field($_POST['_store_branch_longitude']));
@@ -282,6 +313,20 @@ class Multi_Vendor_Store_CPT {
 			update_post_meta($post_id, '_store_branches', $_POST["_store_branches"]);
 		}
 	}
+
+	public function change_excerpt_label($translation, $original){
+
+		global $post;
+		if (isset($post->post_type) && 'store_branch' === $post->post_type) {
+			if ('Excerpt' === $original) {
+				return 'Description';
+			}
+		}
+		return $translation;
+
+	}
+	// add_filter( 'gettext', 'change_excerpt_label', 10, 2 );
+
 
 	// private function get_location($address)
 	// {
@@ -295,27 +340,3 @@ class Multi_Vendor_Store_CPT {
 	// }
 
 }
-
-
-add_filter(
-	'acf/load_field/key=field_6036a2d434136',
-	function ($field) {
-		// Check the current blog id
-		$blog_id = get_current_blog_id();
-
-		// Define the blog ids where specific item should be removed
-		$blog_ids_to_modify = array(2, 3); // Replace with your blog ids
-
-		// Check if the current blog id is in the defined list
-		if (in_array($blog_id, $blog_ids_to_modify)) {
-			// Define the item to remove
-			$item_to_remove = 'Item to Remove'; // Replace with your item
-
-			// Remove the item from choices
-			if (($key = array_search($item_to_remove, $field['choices'])) !== false) {
-				unset($field['choices'][$key]);
-			}
-		}
-		return $field;
-	}
-);

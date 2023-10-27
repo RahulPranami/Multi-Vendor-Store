@@ -79,6 +79,7 @@ class Multi_Vendor_Store_Admin {
 
 		if ( 'store_branch' ===  $current_screen->post_type) {
 			// wp_enqueue_style( 'select2css', '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css' );
+			wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version );
 			wp_enqueue_style('location', plugin_dir_url(__FILE__) . 'css/multi-vendor-store-location.css', [], $this->version );
 		}
 
@@ -109,6 +110,7 @@ class Multi_Vendor_Store_Admin {
 
 		if ( 'store_branch' ===  $current_screen->post_type) {
 			// wp_enqueue_script( 'select2', '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js', [ 'jquery' ], '4.0.13', true );
+			wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true);
 			wp_enqueue_script('location', plugin_dir_url(__FILE__) . 'js/multi-vendor-store-location.js', ['jquery'], $this->version, true);
 		}
 		// wp_enqueue_script('polyfill', 'https://polyfill.io/v3/polyfill.min.js?features=default', [], $this->version, true);
