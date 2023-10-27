@@ -10,25 +10,30 @@
         container: "map",
         // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
         style: "mapbox://styles/mapbox/streets-v12",
-        zoom: 9,
     });
 
-    marker
-        .setLngLat([
-            $("#store-branch-longitude").val(),
-            $("#store-branch-latitude").val(),
-        ])
-        .addTo(map);
+    if (
+        $("#store-branch-latitude").val() &&
+        $("#store-branch-longitude").val()
+    ) {
+        marker
+            .setLngLat([
+                $("#store-branch-longitude").val(),
+                $("#store-branch-latitude").val(),
+            ])
+            .addTo(map);
 
-    map.flyTo({
-        center: [
-            $("#store-branch-longitude").val(),
-            $("#store-branch-latitude").val(),
-        ],
-        zoom: 8,
-        duration: 2000,
-        offset: [100, 50],
-    });
+        setTimeout(() => {
+            map.flyTo({
+                center: [
+                    $("#store-branch-longitude").val(),
+                    $("#store-branch-latitude").val(),
+                ],
+                zoom: 8,
+                duration: 5000,
+            });
+        }, 1000);
+    }
 
     map.on("click", function (e) {
         // var pointer = new mapboxgl.Marker()
@@ -58,7 +63,6 @@
             center: [$(this).data("longitude"), $(this).data("latitude")],
             zoom: 8,
             duration: 2000,
-            offset: [100, 50],
         });
     });
 
