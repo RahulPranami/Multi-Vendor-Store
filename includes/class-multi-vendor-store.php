@@ -179,6 +179,8 @@ class Multi_Vendor_Store {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action( 'the_content', $plugin_public, 'store_location_map' );
+		$this->loader->add_filter( 'woocommerce_product_tabs', $plugin_public, 'product_store_location_tab' );
 
 	}
 
@@ -197,9 +199,6 @@ class Multi_Vendor_Store {
 		$this->loader->add_action( 'add_meta_boxes', $plugin_cpt, 'store_branch_metabox' );
 		$this->loader->add_action( 'save_post', $plugin_cpt, 'store_branch_meta_save' );
 		$this->loader->add_filter( 'gettext', $plugin_cpt, 'change_excerpt_label' , 10, 2 );
-
-		// $this->loader->add_action( 'wp_ajax_nopriv_get_product', $plugin_cpt, 'get_product_card' );
-		// $this->loader->add_action( 'wp_ajax_get_product', $plugin_cpt, 'get_product_card' );
 
 	}
 

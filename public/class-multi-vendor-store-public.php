@@ -75,6 +75,10 @@ class Multi_Vendor_Store_Public {
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/multi-vendor-store-public.css', array(), $this->version, 'all' );
 
+		if ('store_branch' == get_post_type() || 'product'== get_post_type() ) {
+			wp_enqueue_style( 'mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version );
+		}
+
 	}
 
 	/**
@@ -98,6 +102,59 @@ class Multi_Vendor_Store_Public {
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/multi-vendor-store-public.js', array( 'jquery' ), $this->version, false );
 
+		if ('store_branch' == get_post_type() || 'product'== get_post_type() ) {
+			wp_enqueue_script( 'mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true );
+			wp_enqueue_script( 'location', plugin_dir_url(__FILE__) . 'js/multi-vendor-store-location.js', ['jquery'], $this->version, true );
+		}
+
+	}
+
+	public function store_location_map($content) {
+		global $post;
+
+		// Check if it's the desired custom post type
+		if (is_singular('store_branch')) {
+			$latitude = 0;
+			$longitude = 0;
+
+			$latitude = get_post_meta($post->ID, '_store_branch_location_latitude', true);
+			$longitude = get_post_meta($post->ID, '_store_branch_location_longitude', true);
+
+			if ($latitude !== 0 && $longitude !== 0) {
+				// Add your custom content after the post content
+				$custom_content = '<input type="hidden" id="store-latitude" value="' . $latitude . '" />';
+				$custom_content .= '<input type="hidden" id="store-longitude" value="' . $longitude . '" />';
+				$custom_content .= '<div id="map" style="width: 100%; height: 500px;"></div>';
+
+				$content .= $custom_content;
+			}
+		}
+		return $content;
+	}
+
+    public function product_store_location_tab($tabs) {
+		global $post;
+
+		$vendors = get_post_meta($post->ID, '_store_branches', true);
+		$locations = [];
+
+		if (empty($vendors))
+			return $tabs;
+
+		foreach ($vendors as $vendor) {
+			$locations[$vendor] = [(float) get_post_meta($vendor, '_store_branch_location_longitude', true), (float) get_post_meta($vendor, '_store_branch_location_latitude', true)];
+		}
+
+		wp_localize_script('location', 'stores', [ 'locations' => $locations ]);
+
+		$tabs['stores_location'] = [
+			'title'     => __('Stores Location', 'woocommerce'),
+			'priority'  => 20,
+			'callback'  => function () {
+				echo '<div id="map" style="width: 100%; height: 500px;"></div>';
+			},
+		];
+		return $tabs;
 	}
 
 }

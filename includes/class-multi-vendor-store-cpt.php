@@ -325,18 +325,5 @@ class Multi_Vendor_Store_CPT {
 		return $translation;
 
 	}
-	// add_filter( 'gettext', 'change_excerpt_label', 10, 2 );
-
-
-	// private function get_location($address)
-	// {
-	// 	$api_url = "https://geocode.maps.co/search?q=";
-
-
-	// 	$location = null;
-
-
-	// 	return $location;
-	// }
 
 }
