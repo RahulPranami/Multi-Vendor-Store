@@ -117,4 +117,18 @@ class Multi_Vendor_Store_Admin {
 
 	}
 
+	function add_shop_vendors_column($columns) {
+		$columns['shop_vendors'] = __('Shop Vendors', 'textdomain');
+		error_log("Columns : ".print_r($columns, true));
+		return $columns;
+	}
+
+	function show_shop_vendors_column_data($column, $post_id) {
+		if ($column == 'shop_vendors') {
+			// output data for shop vendors column
+			$vendor = get_post_meta($post_id, 'shop_vendors', true);
+			echo $vendor;
+		}
+	}
+
 }

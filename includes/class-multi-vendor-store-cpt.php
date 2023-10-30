@@ -208,8 +208,10 @@ class Multi_Vendor_Store_CPT {
 				ob_start();
 ?>
 			<div class="store-location-meta">
+				<h3 style="color: #0073aa;">Contact Us</h3>
+				<p style="font-size: 14px;">We would love to hear from you. Please reach out to us at:</p>
 				<label for="store-phone">Store Contact Number</label>
-				<input type="number" id="store-phone" class="search-box" name="_store_phone" value="<?php echo $store_phone; ?>" />
+				<input type="number" id="store-phone" class="widefat" name="_store_phone" value="<?php echo $store_phone; ?>" />
 			</div>
 <?php
 				echo ob_get_clean();
@@ -220,7 +222,7 @@ class Multi_Vendor_Store_CPT {
 
 		add_meta_box(
 			'store_branch_location',
-			'Store Branch',
+			'Store Branch Location',
 			function ($post) {
 				$store_location = get_post_meta($post->ID, '_store_branch_location', true);
 				$store_location_latitude = get_post_meta($post->ID, '_store_branch_location_latitude', true);
@@ -229,18 +231,19 @@ class Multi_Vendor_Store_CPT {
 				ob_start();
 ?>
 			<div class="store-location-meta">
-				<label for="store-location">Store Location</label>
-				<input type="text" id="store-branch-location" class="search-box" name="_store_branch_location" value="<?php echo $store_location; ?>" />
-				<!-- <div id="fetched-locations"></div> -->
-
+				<h3 style="color: #0073aa;">Store Location</h3>
+				<p style="font-size: 14px;">You can enter the location in text or select it from the map below.</p>
+				<label for="store-location">Store Location (Text)</label>
+				<input type="text" id="store-branch-location" class="widefat" name="_store_branch_location" value="<?php echo $store_location; ?>"/>
+				<label for="store-location-fetched">Store Location (Selected from Map)</label>
 				<input type="text" id="store-branch-location-fetched" name="_store_branch_location_fetched" value="<?php echo $store_location_fetched  ?>" readonly />
+				<label for="store-latitude">Latitude</label>
 				<input type="text" id="store-branch-latitude" name="_store_branch_latitude" value="<?php echo $store_location_latitude  ?>" readonly />
+				<label for="store-longitude">Longitude</label>
 				<input type="text" id="store-branch-longitude" name="_store_branch_longitude" value="<?php echo $store_location_longitude ?>" readonly />
 				<ul id="fetched-locations"></ul>
 			</div>
 			<div id='map' style='width: 100%; height: 500px;'></div>
-			<!-- <div><iframe src="https://maps.co/embed/65324da943830555545866ygud073e2" width="100%" height="600" frameborder="0" allowfullscreen></iframe></div> -->
-			<!-- <iframe src="https://www.w3schools.com" title="W3Schools Free Online Web Tutorials" height="500px" width="500px"> -->
 <?php
 				echo ob_get_clean();
 			},
@@ -255,7 +258,7 @@ class Multi_Vendor_Store_CPT {
 				$saved_vendors = get_post_meta($post->ID, '_store_branches', true);
 				$vendors = get_posts(['post_type' => 'store_branch', 'posts_per_page' => -1]);
 
-				echo '<div class=""tabs-panel" style="max-height:200px;overflow:auto;">';
+				echo '<div class="tabs-panel" style="max-height:200px;overflow:auto;">';
 				echo '<ul>';
 				foreach ($vendors as $vendor) :
 					$checked = (is_array($saved_vendors)) ? checked(in_array($vendor->ID, $saved_vendors), true, false) : false;
@@ -273,17 +276,77 @@ class Multi_Vendor_Store_CPT {
 		);
 
 		add_meta_box(
-			'store_phone2',
-			'Store Contact Number',
+			'store_email',
+			'Store Email',
 			function ($post) {
-				$store_phone = get_post_meta($post->ID, '_store_phone', true);
+				$store_email = get_post_meta($post->ID, '_store_email', true);
 
 				ob_start();
 ?>
-			<div class="store-location-meta">
-				<label for="store-phone">Store Contact Number</label>
-				<input type="number" id="store-phone" class="search-box" name="_store_phone" value="<?php echo $store_phone; ?>" />
+			<div class="store-email-meta">
+				<label for="store-email">Store Email</label>
+				<input type="email" id="store-email" class="widefat" name="_store_email" value="<?php echo $store_email; ?>" />
 			</div>
+<?php
+				echo ob_get_clean();
+			},
+			'store_branch',
+			'normal'
+		);
+
+		add_meta_box(
+			'store_description',
+			'Store Description',
+			function ($post) {
+				$store_description = get_post_meta($post->ID, '_store_description', true);
+
+				ob_start();
+?>
+			<div class="store-description-meta">
+				<label for="store-description">Store Description</label>
+				<textarea id="store-description" class="widefat" name="_store_description"><?php echo $store_description; ?></textarea>
+			</div>
+<?php
+				echo ob_get_clean();
+			},
+			'store_branch',
+			'normal'
+		);
+
+		add_meta_box(
+			'store_address',
+			'Store Address',
+			function ($post) {
+				$store_address_line1 = get_post_meta($post->ID, '_store_address_line1', true);
+				$store_address_line2 = get_post_meta($post->ID, '_store_address_line2', true);
+				$store_city = get_post_meta($post->ID, '_store_city', true);
+				$store_state = get_post_meta($post->ID, '_store_state', true);
+				$store_country = get_post_meta($post->ID, '_store_country', true);
+
+				ob_start();
+?>
+				<div class="inside">
+					<p>
+						<label for="store-address-line1">Address Line 1</label>
+						<input type="text" id="store-address-line1" class="widefat" name="_store_address_line1" value="<?php echo $store_address_line1; ?>" />
+					</p>
+					<p>
+						<label for="store-address-line2">Address Line 2</label>
+						<input type="text" id="store-address-line2" class="widefat" name="_store_address_line2" value="<?php echo $store_address_line2; ?>" />
+					</p>
+					<p>
+						<label for="store-city">City</label>
+						<input type="text" id="store-city" class="widefat" name="_store_city" value="<?php echo $store_city; ?>" />
+					</p>
+					<p>
+						<label for="store-state">State</label>
+						<input type="text" id="store-state" class="widefat" name="_store_state" value="<?php echo $store_state; ?>" />
+					</p>
+					<p>
+						<label for="store-country">Country</label>
+						<input type="text" id="store-country" class="widefat" name="_store_country" value="<?php echo $store_country; ?>" />
+					</p>
+				</div>
 <?php
 				echo ob_get_clean();
 			},
@@ -302,28 +365,57 @@ class Multi_Vendor_Store_CPT {
 	function store_branch_meta_save($post_id)
 	{
 
-		if (isset($_POST['_store_branch_location'])) {
+		if (isset($_POST['_store_branch_location']))
 			update_post_meta($post_id, '_store_branch_location', sanitize_text_field($_POST['_store_branch_location']));
+
+		if (isset($_POST['_store_branch_location_latitude']))
 			update_post_meta($post_id, '_store_branch_location_latitude', sanitize_text_field($_POST['_store_branch_latitude']));
+
+		if (isset($_POST['_store_branch_location_longitude']))
 			update_post_meta($post_id, '_store_branch_location_longitude', sanitize_text_field($_POST['_store_branch_longitude']));
+
+		if (isset($_POST['_store_branch_location_fetched']))
 			update_post_meta($post_id, '_store_branch_location_fetched', sanitize_text_field($_POST['_store_branch_location_fetched']));
-		}
 
-		if (isset($_POST['_store_branches'])) {
+		if (isset($_POST['_store_phone']))
+			update_post_meta($post_id, '_store_phone', sanitize_text_field($_POST['_store_phone']));
+
+		if (isset($_POST['_store_email']))
+			update_post_meta($post_id, '_store_email', sanitize_text_field($_POST['_store_email']));
+
+		if (isset($_POST['_store_description']))
+			update_post_meta($post_id, '_store_description', sanitize_text_field($_POST['_store_description']));
+
+		if (isset($_POST['_store_branches']))
 			update_post_meta($post_id, '_store_branches', $_POST["_store_branches"]);
-		}
+
+			
+		if (isset($_POST['_store_address_line1']))
+		update_post_meta($post_id, '_store_address_line1', sanitize_text_field($_POST['_store_address_line1']));
+
+	if (isset($_POST['_store_address_line2']))
+		update_post_meta($post_id, '_store_address_line2', sanitize_text_field($_POST['_store_address_line2']));
+
+	if (isset($_POST['_store_city']))
+		update_post_meta($post_id, '_store_city', sanitize_text_field($_POST['_store_city']));
+
+	if (isset($_POST['_store_state']))
+		update_post_meta($post_id, '_store_state', sanitize_text_field($_POST['_store_state']));
+
+	if (isset($_POST['_store_country']))
+		update_post_meta($post_id, '_store_country', sanitize_text_field($_POST['_store_country']));
 	}
 
-	public function change_excerpt_label($translation, $original){
+	// public function change_excerpt_label($translation, $original){
 
-		global $post;
-		if (isset($post->post_type) && 'store_branch' === $post->post_type) {
-			if ('Excerpt' === $original) {
-				return 'Description';
-			}
-		}
-		return $translation;
+	// 	global $post;
+	// 	if (isset($post->post_type) && 'store_branch' === $post->post_type) {
+	// 		if ('Excerpt' === $original) {
+	// 			return 'Description';
+	// 		}
+	// 	}
+	// 	return $translation;
 
-	}
+	// }
 
 }
