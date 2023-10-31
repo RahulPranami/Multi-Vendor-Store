@@ -30,11 +30,10 @@
         });
 
         $(document).on("click", ".location", function () {
-            marker.remove();
+            $(".location.active").removeClass('active');
+            $(this).addClass('active');
 
-            $("#store-branch-location-fetched").val(
-                $(this).data("displayname")
-            );
+            $("#store-branch-location-fetched").val($(this).data("displayname"));
             $("#store-branch-latitude").val($(this).data("latitude"));
             $("#store-branch-longitude").val($(this).data("longitude"));
 
@@ -72,10 +71,11 @@
             statusCode: {
                 200: function (response) {
                     $("#fetched-locations").empty();
+                    $("#fetched-locations").show();
                     response.features.forEach((element) => {
                         $("#fetched-locations").append(
-                            `<li class='fetched-location' >  <input type='radio' class='location' name='selected_location' id='${element.id}' data-longitude='${element.geometry.coordinates[0]}' data-displayname='${element.place_name}' data-latitude='${element.geometry.coordinates[1]}' /><label for='${element.id}'>${element.place_name}</label></li>`
-                        );
+                            `<div class="location fetched-location" id="${element.id}" data-longitude="${element.geometry.coordinates[0]}" data-displayname="${element.place_name}" data-latitude="${element.geometry.coordinates[1]}"><span>${element.place_name}</span></div>`
+                            );
                     });
                 },
             },

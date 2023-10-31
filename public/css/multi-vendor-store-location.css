@@ -1,0 +1,48 @@
+/**
+ * All of the CSS for your public-facing functionality should be
+ * included in this file.
+ */
+
+.store-details {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.store-details h2 {
+    color: #333;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+.store-info-item {
+    display: flex;
+    justify-content: space-between;
+}
+.store-info-item p {
+    margin-bottom: 10px;
+}
+.store-info-item p strong {
+    font-weight: bold;
+}
+#map {
+    width: 100%;
+    height: 500px;
+    border-radius: 5px;
+    margin: 20px auto;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+}
+
+#map .mapboxgl-ctrl-attrib-inner,
+#map .mapboxgl-ctrl-bottom-left {
+    display: none;
+}
+
+.store-details .store-info p {
+    width: 50%;
+}
+
+.store-details .store-info .latlong {
+    display: flex;
+    justify-content: space-between;
+}
