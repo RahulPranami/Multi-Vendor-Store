@@ -96,7 +96,7 @@ class Multi_Vendor_Store_CPT
 			'label'                 => __('Store Branch', 'default'),
 			'description'           => __('Branch of a Store', 'default'),
 			'labels'                => $labels,
-			'supports'              => ['title', 'Description' => 'excerpt', 'thumbnail'],
+			'supports'              => ['title', 'thumbnail'],
 			// 'taxonomies'            => ['category', 'post_tag'],
 			'hierarchical'          => false,
 			'public'                => true,
@@ -166,7 +166,8 @@ class Multi_Vendor_Store_CPT
 	 * Summary of store_branch_metabox
 	 * @return void
 	 */
-	function store_branch_metabox()	{
+	function store_branch_metabox()
+	{
 
 		add_meta_box(
 			'store_details',
@@ -199,26 +200,32 @@ class Multi_Vendor_Store_CPT
 
 			<div class="store-address-meta store-location-meta">
 				<h3 style="color: #0073aa;">Store Address</h3>
-				<p>
-					<label class="store-label" for="store-address-line1">Address Line 1</label>
-					<input type="text" id="store-address-line1" class="widefat" name="_store_address_line1" value="<?php echo $store_address_line1; ?>" />
-				</p>
-				<p>
-					<label class="store-label" for="store-address-line2">Address Line 2</label>
-					<input type="text" id="store-address-line2" class="widefat" name="_store_address_line2" value="<?php echo $store_address_line2; ?>" />
-				</p>
-				<p>
-					<label class="store-label" for="store-city">City</label>
-					<input type="text" id="store-city" class="widefat" name="_store_city" value="<?php echo $store_city; ?>" />
-				</p>
-				<p>
-					<label class="store-label" for="store-state">State</label>
-					<input type="text" id="store-state" class="widefat" name="_store_state" value="<?php echo $store_state; ?>" />
-				</p>
-				<p>
-					<label class="store-label" for="store-country">Country</label>
-					<input type="text" id="store-country" class="widefat" name="_store_country" value="<?php echo $store_country; ?>" />
-				</p>
+				<div style="display: flex; justify-content: space-between;">
+					<p style="width: 45%;">
+						<label class="store-label" for="store-address-line1">Address Line 1</label>
+						<input type="text" id="store-address-line1" class="widefat" name="_store_address_line1" value="<?php echo $store_address_line1; ?>" />
+					</p>
+					<p style="width: 45%;">
+						<label class="store-label" for="store-address-line2">Address Line 2</label>
+						<input type="text" id="store-address-line2" class="widefat" name="_store_address_line2" value="<?php echo $store_address_line2; ?>" />
+					</p>
+				</div>
+				<div style="display: flex; justify-content: space-between;">
+					<p style="width: 45%;">
+						<label class="store-label" for="store-city">City</label>
+						<input type="text" id="store-city" class="widefat" name="_store_city" value="<?php echo $store_city; ?>" />
+					</p>
+					<p style="width: 45%;">
+						<label class="store-label" for="store-state">State</label>
+						<input type="text" id="store-state" class="widefat" name="_store_state" value="<?php echo $store_state; ?>" />
+					</p>
+				</div>
+				<div>
+					<p style="width: 45%;">
+						<label class="store-label" for="store-country">Country</label>
+						<input type="text" id="store-country" class="widefat" name="_store_country" value="<?php echo $store_country; ?>" />
+					</p>
+				</div>
 			</div>
 		<?php
 				echo ob_get_clean();
@@ -239,7 +246,7 @@ class Multi_Vendor_Store_CPT
 		?>
 			<div class="store-location-meta">
 				<h3>Store Location <span>( Enter the location in text or select it from the map below. )</span></h3>
-				<label class="store-label" for="store-location">Store Location (Text)</label>
+				<label class="store-label" for="store-location">Search Location (Text)</label>
 				<input type="text" id="store-branch-location" class="widefat store-input" name="_store_branch_location" />
 
 				<div id="fetched-locations"></div>
@@ -292,7 +299,8 @@ class Multi_Vendor_Store_CPT
 	 * @param mixed $post_id Id of the post being saved
 	 * @return void
 	 */
-	function store_branch_meta_save($post_id) {
+	function store_branch_meta_save($post_id)
+	{
 
 		// if (isset($_POST['_store_branch_location']))
 		// 	update_post_meta($post_id, '_store_branch_location', sanitize_text_field($_POST['_store_branch_location']));
@@ -315,8 +323,11 @@ class Multi_Vendor_Store_CPT
 		if (isset($_POST['_store_description']))
 			update_post_meta($post_id, '_store_description', sanitize_text_field($_POST['_store_description']));
 
-		if (isset($_POST['_store_branches']))
+		if (isset($_POST['_store_branches']) && !empty($_POST['_store_branches'])) {
 			update_post_meta($post_id, '_store_branches', $_POST["_store_branches"]);
+		} else {
+			delete_post_meta($post_id, '_store_branches');
+		}
 
 		if (isset($_POST['_store_address_line1']))
 			update_post_meta($post_id, '_store_address_line1', sanitize_text_field($_POST['_store_address_line1']));

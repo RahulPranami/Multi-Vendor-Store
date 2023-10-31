@@ -2,7 +2,7 @@
  * All of the CSS for your public-facing functionality should be
  * included in this file.
  */
-
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
 .store-details {
     background-color: #f9f9f9;
     border-radius: 5px;
@@ -46,3 +46,44 @@
     display: flex;
     justify-content: space-between;
 }
+
+/* .marker {
+    display: block;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+} */
+
+.marker {
+    /* background-image: url("mapbox-icon.png"); */
+    padding: 0;
+    background-size: cover;
+    width: 50px;
+    height: 50px;
+    background-size: 100%;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.mapboxgl-popup .mapboxgl-popup-close-button {
+    padding: 10px;
+}
+
+.mapboxgl-popup {
+    max-width: 300px;
+    min-width: 100px;
+}
+
+/*
+.mapboxgl-popup-content {
+    text-align: center;
+    font-family: "Open Sans", sans-serif;
+}
+
+.mapboxgl-popup-content h3 {
+    font-size: 12px;
+}
+
+.mapboxgl-popup-content p {
+    font-size: 8px;
+} */

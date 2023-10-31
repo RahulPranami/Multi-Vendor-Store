@@ -111,6 +111,7 @@ class Multi_Vendor_Store_Public {
 	}
 
 	public function store_location_map($content) {
+
 		// Check if it's the desired custom post type
 		if (is_singular('store_branch')) {
 			require_once __DIR__ .'/partials/multi-vendor-store-location.php';
@@ -133,6 +134,38 @@ class Multi_Vendor_Store_Public {
 
 		wp_localize_script('location', 'stores', [ 'locations' => $locations ]);
 
+		$geojson = array(
+			'type'=> 'FeatureCollection',
+			'features'=> array()
+		);
+
+		foreach ($vendors as $vendor) {
+
+			$thumbnail = get_the_post_thumbnail_url($vendor);
+			if (empty($thumbnail))
+				$thumbnail = plugin_dir_url(__FILE__) . 'images/marker.png';
+
+			$vendor_data = array(
+				'type' => 'Feature',
+				'geometry' => array(
+					'type' => 'Point',
+					'coordinates' => array(
+						(float) get_post_meta($vendor, '_store_branch_location_longitude', true),
+						(float) get_post_meta($vendor, '_store_branch_location_latitude', true)
+					)
+				),
+				'properties' => array(
+					'title' => get_the_title($vendor),
+					'description' => get_post_meta($vendor, '_store_description', true),
+					'image' => $thumbnail
+				)
+			);
+
+			array_push($geojson['features'], $vendor_data);
+		}
+
+		wp_localize_script('location', 'geojson', $geojson );
+
 		$tabs['stores_location'] = [
 			'title'     => __('Stores Location', 'woocommerce'),
 			'priority'  => 20,
@@ -140,6 +173,7 @@ class Multi_Vendor_Store_Public {
 				echo '<div id="map" style="width: 100%; height: 500px;"></div>';
 			},
 		];
+
 		return $tabs;
 	}
 
