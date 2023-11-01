@@ -1,7 +1,5 @@
 <?php
 
-use WpOrg\Requests\Session;
-
 /**
  * The file that defines the core plugin class
  *
@@ -164,6 +162,10 @@ class Multi_Vendor_Store {
 
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
+		$this->loader->add_action('admin_menu', $plugin_admin, 'mapbox_options_page');
+		$this->loader->add_action('admin_init', $plugin_admin, 'check_api_key');
+		$this->loader->add_action('admin_init', $plugin_admin, 'mapbox_settings_init');
+		$this->loader->add_action('admin_init', $plugin_admin, 'save_mapbox_option_data');
 		$this->loader->add_filter( 'manage_product_posts_columns', $plugin_admin, 'add_shop_vendors_column' );
 		$this->loader->add_filter( 'manage_product_posts_custom_column', $plugin_admin, 'show_shop_vendors_column_data', 10, 2 );
 
@@ -201,7 +203,6 @@ class Multi_Vendor_Store {
 		$this->loader->add_action( 'init', $plugin_cpt, 'store_branch_post_type' );
 		$this->loader->add_action( 'add_meta_boxes', $plugin_cpt, 'store_branch_metabox' );
 		$this->loader->add_action( 'save_post', $plugin_cpt, 'store_branch_meta_save' );
-		// $this->loader->add_filter( 'gettext', $plugin_cpt, 'change_excerpt_label' , 10, 2 );
 
 	}
 

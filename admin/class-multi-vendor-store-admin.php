@@ -146,7 +146,6 @@ class Multi_Vendor_Store_Admin {
 		);
 	}
 
-
 	public function mapbox_settings_callback() {
 
 		if (!current_user_can('manage_options'))
@@ -201,6 +200,12 @@ class Multi_Vendor_Store_Admin {
 	public function mapbox_field_api_key() {
 		$api_key = get_option('mapbox_api_key');
 		echo '<input type="text" id="mapbox_api_key" name="mapbox_api_key" value="' . esc_attr($api_key) . '">';
+	}
+
+	function save_mapbox_option_data() {
+		if ( isset( $_POST['mapbox_api_key'] ) ) {
+			update_option( 'mapbox_api_key', sanitize_text_field( $_POST['mapbox_api_key'] ) );
+		}
 	}
 
 	function add_shop_vendors_column($columns)
