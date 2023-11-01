@@ -79,7 +79,11 @@ class Multi_Vendor_Store_Admin {
 		wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/multi-vendor-store-admin.css', array(), $this->version, 'all');
 
 		if ('store_branch' ===  $current_screen->post_type) {
-			wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version);
+			if (get_option('mapbox_version') == 'v3')
+				wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css', [], $this->version);
+			else
+				wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version);
+
 			wp_enqueue_style('mapbox-geocoder', 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css', [], $this->version);
 			wp_enqueue_style('location', plugin_dir_url(__FILE__) . 'css/multi-vendor-store-location.css', [], $this->version);
 		}
@@ -109,12 +113,16 @@ class Multi_Vendor_Store_Admin {
 		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/multi-vendor-store-admin.js', ['jquery'], $this->version, true);
 
 		if ('store_branch' ===  $current_screen->post_type) {
-			wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true);
+			if (get_option('mapbox_version') == 'v3')
+				wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js', ['jquery'], $this->version, true);
+			else
+				wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true);
+
 			wp_enqueue_script('mapbox-geocoder', 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js', ['jquery'], $this->version, true);
 
 			if ($this->check_api_key()) {
 				wp_enqueue_script('location', plugin_dir_url(__FILE__) . 'js/multi-vendor-store-location.js', ['jquery'], $this->version, true);
-				wp_localize_script('location', 'mapbox', ['apiKey' => get_option('mapbox_api_key')]);
+				wp_localize_script('location', 'mapbox', ['apiKey' => get_option('mapbox_api_key'), 'style' => get_option('mapbox_field_style')]);
 			}
 
 		}
@@ -174,9 +182,9 @@ class Multi_Vendor_Store_Admin {
 		register_setting('mapbox', 'mapbox_options');
 
 		add_settings_section(
-			'mapbox_api_key_section',
+			'mapbox_settings_section',
 			__('Mapbox API Key Settings.', 'default'),
-			[$this, 'mapbox_api_key_section_cb'],
+			[$this, 'mapbox_settings_section_cb'],
 			'mapbox'
 		);
 
@@ -185,15 +193,39 @@ class Multi_Vendor_Store_Admin {
 			__('Mapbox API Key', 'default'),
 			[$this, 'mapbox_field_api_key'],
 			'mapbox',
-			'mapbox_api_key_section',
+			'mapbox_settings_section',
 			array(
 				'label_for'         => 'mapbox_api_key',
 				'class'             => 'mapbox_api_key'
 			)
 		);
+
+		add_settings_field(
+			'mapbox_version',
+			__('Mapbox Version', 'default'),
+			[$this, 'mapbox_field_version'],
+			'mapbox',
+			'mapbox_settings_section',
+			array(
+				'label_for'         => 'mapbox_version',
+				'class'             => 'mapbox_version'
+			)
+		);
+
+		add_settings_field(
+			'mapbox_style',
+			__('Mapbox Style', 'default'),
+			[$this, 'mapbox_field_style'],
+			'mapbox',
+			'mapbox_settings_section',
+			array(
+				'label_for'         => 'mapbox_field_style',
+				'class'             => 'mapbox_field_style'
+			)
+		);
 	}
 
-	public function mapbox_api_key_section_cb($args) {
+	public function mapbox_settings_section_cb($args) {
 		echo '<a href="https://docs.mapbox.com/">Documentation for Mapbox</a>';
 	}
 
@@ -202,10 +234,82 @@ class Multi_Vendor_Store_Admin {
 		echo '<input type="text" id="mapbox_api_key" name="mapbox_api_key" value="' . esc_attr($api_key) . '">';
 	}
 
-	function save_mapbox_option_data() {
-		if ( isset( $_POST['mapbox_api_key'] ) ) {
-			update_option( 'mapbox_api_key', sanitize_text_field( $_POST['mapbox_api_key'] ) );
+	public function mapbox_field_version($args) {
+
+		$options = get_option( 'mapbox_version' );
+		?>
+		<select id="<?php echo esc_attr($args['label_for']); ?>"  name="<?php echo esc_attr($args['label_for']); ?>">
+			<option value=""> --- Select a Style --- </option>
+
+			<option value="v2" <?php echo isset($options) ? (selected($options, "v2", false)) : (''); ?>>
+				<?php esc_html_e( 'Mapbox Version 2', 'default' ); ?>
+			</option>
+
+			<option value="v3" <?php echo isset($options) ? (selected($options, "v3", false)) : (''); ?>>
+				<?php esc_html_e( 'Mapbox Version 3', 'default' ); ?>
+			</option>
+		</select>
+		<?php
+	}
+
+	public function mapbox_field_style($args) {
+		$styles = [
+			'street' => 'mapbox://styles/mapbox/streets-v11',
+			'outdoors' => 'mapbox://styles/mapbox/outdoors-v11',
+			'satellite-v11' => 'mapbox://styles/mapbox/satellite-streets-v11',
+			'satellite-v9' => 'mapbox://styles/mapbox/satellite-v9',
+			'Dark' => 'mapbox://styles/mapbox/dark-v10',
+			'Light' => 'mapbox://styles/mapbox/light-v10',
+			'navigation-preview-day' => 'mapbox://styles/mapbox/navigation-preview-day-v4',
+			'navigation-preview-night' => 'mapbox://styles/mapbox/navigation-preview-night-v4',
+			'Mapbox Standard Beta'=>'mapbox://styles/mapbox/standard-beta'
+		];
+
+		$stylesNew = [
+			'Mapbox Streets v12' => 'mapbox://styles/mapbox/streets-v12',
+			'Mapbox Outdoors v12' => 'mapbox://styles/mapbox/outdoors-v12',
+			'Mapbox Light v11' => 'mapbox://styles/mapbox/light-v11',
+			'Mapbox Dark v11' => 'mapbox://styles/mapbox/dark-v11',
+			'Mapbox Satellite v9' => 'mapbox://styles/mapbox/satellite-v9',
+			'Mapbox Satellite Streets v12' => 'mapbox://styles/mapbox/satellite-streets-v12',
+			'Mapbox Navigation Day v1' => 'mapbox://styles/mapbox/navigation-day-v1',
+			'Mapbox Navigation Night v1' => 'mapbox://styles/mapbox/navigation-night-v1',
+		];
+
+		if ('v3' == get_option('mapbox_version')) {
+			$betaStyle = [ 'Mapbox Standard Beta' => 'mapbox://styles/mapbox/standard-beta' ];
+			$stylesNew = array_merge($betaStyle, $stylesNew);
 		}
+
+		$options = get_option('mapbox_field_style');
+		?>
+		<select id="<?php echo esc_attr($args['label_for']); ?>"  name="<?php echo esc_attr($args['label_for']); ?>">
+			<option value=""> --- Select a Style --- </option>
+			<?php foreach ($stylesNew as $key => $value) : ?>
+
+			<option value="<?php echo $value; ?>" <?php echo isset($options) ? (selected($options, $value, false)) : (''); ?>>
+				<?php echo $key; ?>
+			</option>
+
+			<?php endforeach; ?>
+		</select>
+	<?php
+	}
+
+	function save_mapbox_option_data() {
+		if ( isset( $_POST['mapbox_api_key'] ) )
+			update_option( 'mapbox_api_key', sanitize_text_field( $_POST['mapbox_api_key'] ) );
+
+		if ( isset( $_POST['mapbox_version'] ) ) {
+			update_option('mapbox_version', sanitize_text_field($_POST['mapbox_version']));
+			if ('v2' == $_POST['mapbox_version'] && 'mapbox://styles/mapbox/standard-beta' == get_option('mapbox_field_style')) {
+				update_option( 'mapbox_field_style', '' );
+			}
+		}
+
+		if ( isset( $_POST['mapbox_field_style'] ) )
+			update_option( 'mapbox_field_style', sanitize_text_field( $_POST['mapbox_field_style'] ) );
+
 	}
 
 	function add_shop_vendors_column($columns)

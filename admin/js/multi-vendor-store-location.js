@@ -3,10 +3,12 @@
     const access_token = mapbox.apiKey;
     mapboxgl.accessToken = access_token;
     let timer;
+    const mapStyle = "" !== mapbox.style ? mapbox.style : "mapbox://styles/mapbox/streets-v12";
 
     if (document.getElementById("map")) {
         const marker = new mapboxgl.Marker();
-        const map = new mapboxgl.Map({ container: "map", style: "mapbox://styles/mapbox/streets-v12" });
+        const map = new mapboxgl.Map({ container: "map", style: mapStyle, projection: "globe", zoom: 1 });
+        // const map = new mapboxgl.Map({ container: "map", style: "mapbox://styles/mapbox/streets-v12" });
 
         if (document.getElementById("geocoder")) {
             document.getElementById("geocoder").appendChild(
