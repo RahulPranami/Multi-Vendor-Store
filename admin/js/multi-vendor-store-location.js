@@ -1,44 +1,16 @@
 (function ($) {
     "use strict";
-    const access_token =
-        "pk.eyJ1IjoicmFodWxwcmFuYW1pLWJpenRlY2giLCJhIjoiY2xvOGNoZGNmMDBhbjJxa2xjNGNidHFmZyJ9.CqSMl873hAXDund1IEQL8A";
-    let timer;
-
+    const access_token = mapbox.apiKey;
     mapboxgl.accessToken = access_token;
+    let timer;
 
     if (document.getElementById("map")) {
         const marker = new mapboxgl.Marker();
-        const map = new mapboxgl.Map({
-            container: "map",
-            style: "mapbox://styles/mapbox/streets-v12",
-        });
+        const map = new mapboxgl.Map({ container: "map", style: "mapbox://styles/mapbox/streets-v12" });
 
-        if (
-            $("#store-branch-latitude").val() &&
-            $("#store-branch-longitude").val()
-        ) {
-            setTimeout(
-                () =>
-                    marker
-                        .setLngLat([
-                            $("#store-branch-longitude").val(),
-                            $("#store-branch-latitude").val(),
-                        ])
-                        .addTo(map),
-                2000
-            );
-            setTimeout(
-                () =>
-                    map.flyTo({
-                        center: [
-                            $("#store-branch-longitude").val(),
-                            $("#store-branch-latitude").val(),
-                        ],
-                        zoom: 8,
-                        duration: 5000,
-                    }),
-                1000
-            );
+        if ($("#store-branch-latitude").val() && $("#store-branch-longitude").val()) {
+            setTimeout(() => marker.setLngLat([ $("#store-branch-longitude").val(), $("#store-branch-latitude").val() ]).addTo(map), 2000);
+            setTimeout(() => map.flyTo({ center: [ $("#store-branch-longitude").val(), $("#store-branch-latitude").val() ], zoom: 8, duration: 5000 }), 1000);
         }
 
         map.on("click", function (e) {
@@ -56,25 +28,13 @@
             $(".location.active").removeClass("active");
             $(this).addClass("active");
 
-            $("#store-branch-location-fetched").val(
-                $(this).data("displayname")
-            );
+            $("#store-branch-location-fetched").val($(this).data("displayname"));
             $("#store-branch-latitude").val($(this).data("latitude"));
             $("#store-branch-longitude").val($(this).data("longitude"));
 
             // Create a new marker.
-            marker
-                .setLngLat([
-                    $(this).data("longitude"),
-                    $(this).data("latitude"),
-                ])
-                .addTo(map);
-
-            map.flyTo({
-                center: [$(this).data("longitude"), $(this).data("latitude")],
-                zoom: 8,
-                duration: 2000,
-            });
+            marker.setLngLat([ $(this).data("longitude"), $(this).data("latitude") ]).addTo(map);
+            map.flyTo({ center: [$(this).data("longitude"), $(this).data("latitude")], zoom: 8, duration: 2000 });
         });
 
         $("#store-branch-location").on("keyup", function () {
@@ -98,11 +58,7 @@
                     $("#fetched-locations").empty();
                     if (response.features && response.features.length > 0) {
                         $("#fetched-locations").show();
-                        response.features.forEach((element) => {
-                            $("#fetched-locations").append(
-                                `<div class="location fetched-location" id="${element.id}" data-longitude="${element.geometry.coordinates[0]}" data-displayname="${element.place_name}" data-latitude="${element.geometry.coordinates[1]}"><span>${element.place_name}</span></div>`
-                            );
-                        });
+                        response.features.forEach((element) => $("#fetched-locations").append( `<div class="location fetched-location" id="${element.id}" data-longitude="${element.geometry.coordinates[0]}" data-displayname="${element.place_name}" data-latitude="${element.geometry.coordinates[1]}"><span>${element.place_name}</span></div>` ));
                     } else {
                         $("#fetched-locations").show();
                         $("#fetched-locations").append(`There are no locations with this name`);
