@@ -106,7 +106,7 @@ class Multi_Vendor_Store_Public {
 		if ('store_branch' == get_post_type() || 'product'== get_post_type() ) {
 			wp_enqueue_script( 'mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true );
 			wp_enqueue_script( 'location', plugin_dir_url(__FILE__) . 'js/multi-vendor-store-location.js', ['jquery'], $this->version, true );
-			wp_localize_script('location', 'mapbox', ['apiKey' => MAPBOX_API_KEY]);
+			wp_localize_script('location', 'mapbox', ['apiKey' => get_option('mapbox_api_key')]);
 		}
 
 	}

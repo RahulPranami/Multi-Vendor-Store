@@ -63,3 +63,11 @@
     border: 1px solid #ddd;
     margin-top: 5px;
 }
+
+.mapboxgl-ctrl-geocoder {
+    min-width: 100%;
+}
+
+.mapboxgl-ctrl-geocoder input{
+    padding-left: 30px;
+}

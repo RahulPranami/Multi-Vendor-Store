@@ -248,6 +248,7 @@ class Multi_Vendor_Store_CPT
 				<h3>Store Location <span>( Enter the location in text or select it from the map below. )</span></h3>
 				<label class="store-label" for="store-location">Search Location (Text)</label>
 				<input type="text" id="store-branch-location" class="widefat store-input" name="_store_branch_location" />
+				<!-- <div id="geocoder" class="geocoder"></div> -->
 
 				<div id="fetched-locations"></div>
 			</div>
@@ -305,10 +306,10 @@ class Multi_Vendor_Store_CPT
 		// if (isset($_POST['_store_branch_location']))
 		// 	update_post_meta($post_id, '_store_branch_location', sanitize_text_field($_POST['_store_branch_location']));
 
-		if (isset($_POST['_store_branch_location_latitude']))
+		if (isset($_POST['_store_branch_latitude']))
 			update_post_meta($post_id, '_store_branch_location_latitude', sanitize_text_field($_POST['_store_branch_latitude']));
 
-		if (isset($_POST['_store_branch_location_longitude']))
+		if (isset($_POST['_store_branch_longitude']))
 			update_post_meta($post_id, '_store_branch_location_longitude', sanitize_text_field($_POST['_store_branch_longitude']));
 
 		if (isset($_POST['_store_branch_location_fetched']))

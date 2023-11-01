@@ -20,8 +20,7 @@
  * @subpackage Multi_Vendor_Store/admin
  * @author     Rahul Pranami <rahulpranami101@gmail.com>
  */
-class Multi_Vendor_Store_Admin
-{
+class Multi_Vendor_Store_Admin {
 
 	/**
 	 * The ID of this plugin.
@@ -48,13 +47,12 @@ class Multi_Vendor_Store_Admin
 	 * @param      string    $plugin_name       The name of this plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct($plugin_name, $version)
-	{
+	public function __construct($plugin_name, $version) {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-		add_action('restrict_manage_posts', [$this, 'filter_custom_post_type_by_category'], 10, 2);
-		add_action('pre_get_posts', [$this, 'filter_custom_posts_by_meta_field']);
+		// add_action('restrict_manage_posts', [$this, 'filter_custom_post_type_by_category'], 10, 2);
+		// add_action('pre_get_posts', [$this, 'filter_custom_posts_by_meta_field']);
 	}
 
 	/**
@@ -62,8 +60,7 @@ class Multi_Vendor_Store_Admin
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_styles()
-	{
+	public function enqueue_styles() {
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -83,6 +80,7 @@ class Multi_Vendor_Store_Admin
 
 		if ('store_branch' ===  $current_screen->post_type) {
 			wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version);
+			wp_enqueue_style('mapbox-geocoder', 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css', [], $this->version);
 			wp_enqueue_style('location', plugin_dir_url(__FILE__) . 'css/multi-vendor-store-location.css', [], $this->version);
 		}
 	}
@@ -92,8 +90,7 @@ class Multi_Vendor_Store_Admin
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts()
-	{
+	public function enqueue_scripts() {
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -113,9 +110,97 @@ class Multi_Vendor_Store_Admin
 
 		if ('store_branch' ===  $current_screen->post_type) {
 			wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true);
-			wp_enqueue_script('location', plugin_dir_url(__FILE__) . 'js/multi-vendor-store-location.js', ['jquery'], $this->version, true);
-			wp_localize_script('location', 'mapbox', ['apiKey' => MAPBOX_API_KEY]);
+			wp_enqueue_script('mapbox-geocoder', 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js', ['jquery'], $this->version, true);
+
+			if ($this->check_api_key()) {
+				wp_enqueue_script('location', plugin_dir_url(__FILE__) . 'js/multi-vendor-store-location.js', ['jquery'], $this->version, true);
+				wp_localize_script('location', 'mapbox', ['apiKey' => get_option('mapbox_api_key')]);
+			}
+
 		}
+	}
+
+	public function check_api_key() {
+
+		if (empty(get_option('mapbox_api_key'))) {
+			add_action('admin_notices', function () {
+				$notice = '<div class="notice notice-error"><p>Warning Please add your Mapbox API key in the plugin settings to activate the plugin. You can find your API key at <a href="https://account.mapbox.com/access-tokens/"> https://account.mapbox.com/access-tokens/ </a>.</p></div>';
+				echo $notice;
+			});
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	public function mapbox_options_page() {
+
+		add_menu_page(
+			'Mapbox Settings',
+			'Mapbox Settings',
+			'manage_options',
+			'mapbox-settings',
+			[$this, 'mapbox_settings_callback'],
+			'dashicons-location-alt',
+			80
+		);
+	}
+
+
+	public function mapbox_settings_callback() {
+
+		if (!current_user_can('manage_options'))
+			return;
+
+		if (isset($_GET['settings-updated']))
+			add_settings_error('mapbox_messages', 'mapbox_message', __('Settings Saved', 'mapbox'), 'updated');
+
+		settings_errors('mapbox_messages');
+?>
+		<div class="wrap">
+			<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+			<form method="post" action="options.php">
+				<?php
+				settings_fields('mapbox');
+				do_settings_sections('mapbox');
+				submit_button('Save Settings');
+				?>
+			</form>
+		</div>
+		<?php
+	}
+
+	public function mapbox_settings_init() {
+
+		register_setting('mapbox', 'mapbox_options');
+
+		add_settings_section(
+			'mapbox_api_key_section',
+			__('Mapbox API Key Settings.', 'default'),
+			[$this, 'mapbox_api_key_section_cb'],
+			'mapbox'
+		);
+
+		add_settings_field(
+			'mapbox_api_key',
+			__('Mapbox API Key', 'default'),
+			[$this, 'mapbox_field_api_key'],
+			'mapbox',
+			'mapbox_api_key_section',
+			array(
+				'label_for'         => 'mapbox_api_key',
+				'class'             => 'mapbox_api_key'
+			)
+		);
+	}
+
+	public function mapbox_api_key_section_cb($args) {
+		echo '<a href="https://docs.mapbox.com/">Documentation for Mapbox</a>';
+	}
+
+	public function mapbox_field_api_key() {
+		$api_key = get_option('mapbox_api_key');
+		echo '<input type="text" id="mapbox_api_key" name="mapbox_api_key" value="' . esc_attr($api_key) . '">';
 	}
 
 	function add_shop_vendors_column($columns)
@@ -180,11 +265,12 @@ class Multi_Vendor_Store_Admin
 				}
 				?>
 			</select>
-		<?php
+<?php
 		}
 	}
 
-	function filter_custom_posts_by_meta_field($query){
+	function filter_custom_posts_by_meta_field($query)
+	{
 		global $pagenow, $typenow;
 
 		$post_type = 'product'; // Replace 'my_custom_post' with your custom post type
