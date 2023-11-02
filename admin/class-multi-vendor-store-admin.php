@@ -80,9 +80,11 @@ class Multi_Vendor_Store_Admin {
 
 		if ('store_branch' ===  $current_screen->post_type) {
 			if (get_option('mapbox_version') == 'v3')
-				wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css', [], $this->version);
+				wp_enqueue_style( 'mapbox', plugin_dir_url( __FILE__ ) . 'css/mapbox-gl-v3.css', array(), $this->version );
 			else
-				wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version);
+				wp_enqueue_style( 'mapbox', plugin_dir_url( __FILE__ ) . 'css/mapbox-gl-v2.css', array(), $this->version );
+				// wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css', [], $this->version);
+				// wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version);
 
 			wp_enqueue_style('mapbox-geocoder', 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css', [], $this->version);
 			wp_enqueue_style('location', plugin_dir_url(__FILE__) . 'css/multi-vendor-store-location.css', [], $this->version);
@@ -114,9 +116,11 @@ class Multi_Vendor_Store_Admin {
 
 		if (is_object($current_screen) && 'store_branch' ===  $current_screen->post_type) {
 			if (get_option('mapbox_version') == 'v3')
-				wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js', ['jquery'], $this->version, true);
+				wp_enqueue_script( 'mapbox', plugin_dir_url( __FILE__ ) . 'js/mapbox-gl-v3.js', array( 'jquery' ), $this->version, false );
 			else
-				wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true);
+				wp_enqueue_script( 'mapbox', plugin_dir_url( __FILE__ ) . 'js/mapbox-gl-v2.js', array( 'jquery' ), $this->version, false );
+				// wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js', ['jquery'], $this->version, true);
+				// wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true);
 
 			wp_enqueue_script('mapbox-geocoder', 'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js', ['jquery'], $this->version, true);
 
@@ -132,12 +136,51 @@ class Multi_Vendor_Store_Admin {
 
 		if (empty(get_option('mapbox_api_key'))) {
 			add_action('admin_notices', function () {
-				$notice = '<div class="notice notice-error"><p>Warning Please add your Mapbox API key in the plugin settings to activate the plugin. You can find your API key at <a href="https://account.mapbox.com/access-tokens/"> https://account.mapbox.com/access-tokens/ </a>.</p></div>';
+				$notice = '<div class="notice notice-error"><p>Warning Please add your Mapbox API key in the plugin settings to activate the plugin. You can find your API key at <a href="https://account.mapbox.com/access-tokens/"> https://account.mapbox.com/access-tokens/ </a> and add here <a href="' . admin_url('admin.php?page=mapbox-settings') . '"> Mapbox Settings Page </a> </p></div>';
 				echo $notice;
 			});
 			return false;
 		} else {
 			return true;
+		}
+	}
+
+	public function validate_api_key_on_save_menu_settings($menu_id) {
+    	// Get the API key from the menu settings
+		$api_key = $_POST['api_key'];
+
+    	// Perform the API key validation
+		$is_valid = $this->validate_api_key($api_key);
+
+    	// Update a flag in the options table to indicate if the API key is valid or not
+		update_option('api_key_valid', $is_valid);
+	}
+
+	public function validate_api_key( $api_key ) {
+		// Initialize cURL
+		$ch = curl_init();
+
+		// Set the URL and headers
+		$url = 'https://api.mapbox.com/';
+		$headers = [ 'Authorization: Bearer ' . $api_key ];
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+		// Execute the cURL request
+		$response = curl_exec($ch);
+
+		// Check the response status code
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+		// Close the cURL session
+		curl_close($ch);
+
+		if ($http_code === 200) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 

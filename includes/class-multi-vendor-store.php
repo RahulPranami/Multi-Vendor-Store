@@ -168,6 +168,7 @@ class Multi_Vendor_Store {
 		$this->loader->add_action('admin_init', $plugin_admin, 'save_mapbox_option_data');
 		$this->loader->add_filter( 'manage_product_posts_columns', $plugin_admin, 'add_shop_vendors_column' );
 		$this->loader->add_filter( 'manage_product_posts_custom_column', $plugin_admin, 'show_shop_vendors_column_data', 10, 2 );
+		// $this->loader->add_action('update_option_menu_settings', $plugin_admin, 'validate_api_key_on_save_menu_settings');
 
 	}
 

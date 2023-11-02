@@ -77,9 +77,11 @@ class Multi_Vendor_Store_Public {
 
 		if ('store_branch' == get_post_type() || 'product'== get_post_type() ) {
 			if (get_option('mapbox_version') == 'v3')
-				wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css', [], $this->version);
+				wp_enqueue_style( 'mapbox', plugin_dir_url( __FILE__ ) . 'css/mapbox-gl-v3.css', array(), $this->version );
 			else
-				wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version);
+				wp_enqueue_style( 'mapbox', plugin_dir_url( __FILE__ ) . 'css/mapbox-gl-v2.css', array(), $this->version );
+				// wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version);
+				// wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css', [], $this->version);
 
 			wp_enqueue_style( 'location', plugin_dir_url(__FILE__) . 'css/multi-vendor-store-location.css', [], $this->version );
 		}
@@ -109,9 +111,11 @@ class Multi_Vendor_Store_Public {
 
 		if ('store_branch' == get_post_type() || 'product'== get_post_type() ) {
 			if (get_option('mapbox_version') == 'v3')
-				wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js', ['jquery'], $this->version, true);
+				wp_enqueue_script( 'mapbox', plugin_dir_url( __FILE__ ) . 'js/mapbox-gl-v3.js', array( 'jquery' ), $this->version, false );
 			else
-				wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true);
+				wp_enqueue_script( 'mapbox', plugin_dir_url( __FILE__ ) . 'js/mapbox-gl-v2.js', array( 'jquery' ), $this->version, false );
+				// wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true);
+				// wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js', ['jquery'], $this->version, true);
 
 			if (!empty(get_option('mapbox_api_key'))) {
 				wp_enqueue_script('location', plugin_dir_url(__FILE__) . 'js/multi-vendor-store-location.js', ['jquery'], $this->version, true);
@@ -126,7 +130,9 @@ class Multi_Vendor_Store_Public {
 
 		// Check if it's the desired custom post type
 		if (is_singular('store_branch')) {
+			ob_start();
 			require_once __DIR__ .'/partials/multi-vendor-store-location.php';
+			$content .= ob_get_clean();
 		}
 		return $content;
 	}
