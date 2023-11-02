@@ -28,10 +28,26 @@ $store_country = get_post_meta($post_id, '_store_country', true);
 
 $store_latitude  = get_post_meta($post_id, '_store_branch_location_latitude', true) ?? 0;
 $store_longitude = get_post_meta($post_id, '_store_branch_location_longitude', true) ?? 0;
+$store_products = get_post_meta($post_id, '_store_products', true);
 
 ?>
 
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
+
+<?php if (!empty($store_products)) : ?>
+    <div id="product-list" class="store-details">
+        <h2>Product List</h2>
+        <div class="store-info">
+            <div class="products">
+                <?php foreach ($store_products as $product_id) : ?>
+                    <a href="<?php echo get_permalink($product_id); ?>" class="product-link">
+                        <?php echo get_the_title($product_id); ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 
 <?php if ($store_phone || $store_email) : ?>
     <div class="store-details">

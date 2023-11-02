@@ -112,7 +112,7 @@ class Multi_Vendor_Store_Admin {
 
 		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/multi-vendor-store-admin.js', ['jquery'], $this->version, true);
 
-		if ('store_branch' ===  $current_screen->post_type) {
+		if (is_object($current_screen) && 'store_branch' ===  $current_screen->post_type) {
 			if (get_option('mapbox_version') == 'v3')
 				wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js', ['jquery'], $this->version, true);
 			else

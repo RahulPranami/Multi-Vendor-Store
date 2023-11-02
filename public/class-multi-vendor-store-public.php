@@ -76,7 +76,11 @@ class Multi_Vendor_Store_Public {
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/multi-vendor-store-public.css', array(), $this->version, 'all' );
 
 		if ('store_branch' == get_post_type() || 'product'== get_post_type() ) {
-			wp_enqueue_style( 'mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version );
+			if (get_option('mapbox_version') == 'v3')
+				wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css', [], $this->version);
+			else
+				wp_enqueue_style('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css', [], $this->version);
+
 			wp_enqueue_style( 'location', plugin_dir_url(__FILE__) . 'css/multi-vendor-store-location.css', [], $this->version );
 		}
 
@@ -104,9 +108,16 @@ class Multi_Vendor_Store_Public {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/multi-vendor-store-public.js', array( 'jquery' ), $this->version, false );
 
 		if ('store_branch' == get_post_type() || 'product'== get_post_type() ) {
-			wp_enqueue_script( 'mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true );
-			wp_enqueue_script( 'location', plugin_dir_url(__FILE__) . 'js/multi-vendor-store-location.js', ['jquery'], $this->version, true );
-			wp_localize_script('location', 'mapbox', ['apiKey' => get_option('mapbox_api_key')]);
+			if (get_option('mapbox_version') == 'v3')
+				wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js', ['jquery'], $this->version, true);
+			else
+				wp_enqueue_script('mapbox', 'https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js', ['jquery'], $this->version, true);
+
+			if (!empty(get_option('mapbox_api_key'))) {
+				wp_enqueue_script('location', plugin_dir_url(__FILE__) . 'js/multi-vendor-store-location.js', ['jquery'], $this->version, true);
+				wp_localize_script('location', 'mapbox', ['apiKey' => get_option('mapbox_api_key'), 'style' => get_option('mapbox_field_style')]);
+			}
+
 		}
 
 	}

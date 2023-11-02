@@ -71,3 +71,26 @@
     max-width: 300px;
     min-width: 100px;
 }
+
+#product-list .products {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.products a:not(:last-child)::after {
+    content: ",";
+    padding-right: 10px;
+}
+
+#product-list .product-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+#product-list .product-link:hover {
+    color: #555;
+}

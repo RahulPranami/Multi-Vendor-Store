@@ -2,10 +2,12 @@
     "use strict";
     const access_token = mapbox.apiKey;
     mapboxgl.accessToken = access_token;
+    const mapStyle = "" !== mapbox.style ? mapbox.style : "mapbox://styles/mapbox/streets-v12";
 
     if (document.getElementById("map")) {
         const marker = new mapboxgl.Marker();
-        const map = new mapboxgl.Map({ container: "map", style: "mapbox://styles/mapbox/streets-v12", center: [80, 36], zoom: 1, pitch: 0, bearing: 0});
+        const map = new mapboxgl.Map({ container: "map", style: mapStyle, projection: "globe", zoom: 1 });
+        // const map = new mapboxgl.Map({ container: "map", style: "mapbox://styles/mapbox/streets-v12", center: [80, 36], zoom: 1, pitch: 0, bearing: 0});
         map.on("style.load", () => {
             map.setFog({
                 color: 'rgb(186, 210, 235)', // Lower atmosphere

@@ -61,8 +61,7 @@ class Multi_Vendor_Store_CPT
 	 *
 	 * @since    1.0.0
 	 */
-	public function store_branch_post_type()
-	{
+	public function store_branch_post_type() {
 		$labels = [
 			'name'                  => _x('Store Branches', 'Post Type General Name', 'default'),
 			'singular_name'         => _x('Store Branch', 'Post Type Singular Name', 'default'),
@@ -117,57 +116,10 @@ class Multi_Vendor_Store_CPT
 	}
 
 	/**
-	 * Register the stylesheets for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	// public function enqueue_styles() {
-
-	/**
-	 * This function is provided for demonstration purposes only.
-	 *
-	 * An instance of this class should be passed to the run() function
-	 * defined in Multi_Vendor_Store_Loader as all of the hooks are defined
-	 * in that particular class.
-	 *
-	 * The Multi_Vendor_Store_Loader will then create the relationship
-	 * between the defined hooks and the functions defined in this
-	 * class.
-	 */
-
-	// wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/multi-vendor-store-admin.css', array(), $this->version, 'all' );
-
-	// }
-
-	/**
-	 * Register the JavaScript for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	// public function enqueue_scripts() {
-
-	/**
-	 * This function is provided for demonstration purposes only.
-	 *
-	 * An instance of this class should be passed to the run() function
-	 * defined in Multi_Vendor_Store_Loader as all of the hooks are defined
-	 * in that particular class.
-	 *
-	 * The Multi_Vendor_Store_Loader will then create the relationship
-	 * between the defined hooks and the functions defined in this
-	 * class.
-	 */
-
-	// wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/multi-vendor-store-admin.js', array( 'jquery' ), $this->version, false );
-
-	// }
-
-	/**
 	 * Summary of store_branch_metabox
 	 * @return void
 	 */
-	function store_branch_metabox()
-	{
+	function store_branch_metabox() {
 
 		add_meta_box(
 			'store_details',
@@ -300,8 +252,7 @@ class Multi_Vendor_Store_CPT
 	 * @param mixed $post_id Id of the post being saved
 	 * @return void
 	 */
-	function store_branch_meta_save($post_id)
-	{
+	function store_branch_meta_save($post_id) {
 
 		// if (isset($_POST['_store_branch_location']))
 		// 	update_post_meta($post_id, '_store_branch_location', sanitize_text_field($_POST['_store_branch_location']));
@@ -326,8 +277,44 @@ class Multi_Vendor_Store_CPT
 
 		if (isset($_POST['_store_branches']) && !empty($_POST['_store_branches'])) {
 			update_post_meta($post_id, '_store_branches', $_POST["_store_branches"]);
+
+			foreach ($_POST["_store_branches"] as $store_branch) {
+				$store_products = [];
+				if (get_post_meta($store_branch, "_store_products", true)) {
+					$store_products = get_post_meta($store_branch, "_store_products", true);
+				}
+
+				if (is_array($store_products) && !in_array($post_id, $store_products)) {
+					$store_products[] = $post_id;
+					update_post_meta($store_branch, "_store_products", $store_products);
+				} else if (!is_array($store_products)) {
+					$store_products = [$post_id];
+					update_post_meta($store_branch, "_store_products", $store_products);
+				} else if (is_array($store_products) && in_array($post_id, $store_products)) {
+					$key = array_search($post_id, $store_products);
+					unset($store_products[$key]);
+					update_post_meta($store_branch, "_store_products", $store_products);
+				}
+			}
 		} else {
+			$store_branches = get_post_meta($post_id, '_store_branches', true);
 			delete_post_meta($post_id, '_store_branches');
+
+			if (isset($store_branches) && !empty($store_branches)) {
+				foreach ($store_branches as $store_branch) {
+					$store_products = [];
+					if (get_post_meta($store_branch, "_store_products", true)) {
+						$store_products = get_post_meta($store_branch, "_store_products", true);
+					}
+
+					if (is_array($store_products) && in_array($post_id, $store_products)) {
+						unset($store_products[array_search($post_id, $store_products)]);
+						update_post_meta($store_branch, "_store_products", $store_products);
+					} else if (!is_array($store_products)) {
+						update_post_meta($store_branch, "_store_products", []);
+					}
+				}
+			}
 		}
 
 		if (isset($_POST['_store_address_line1']))
