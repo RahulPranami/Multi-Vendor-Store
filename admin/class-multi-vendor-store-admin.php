@@ -145,31 +145,26 @@ class Multi_Vendor_Store_Admin {
 		}
 	}
 
-	public function validate_api_key_on_save_menu_settings($menu_id) {
-    	// Get the API key from the menu settings
-		$api_key = $_POST['api_key'];
-
-    	// Perform the API key validation
-		$is_valid = $this->validate_api_key($api_key);
-
-    	// Update a flag in the options table to indicate if the API key is valid or not
-		update_option('api_key_valid', $is_valid);
-	}
-
 	public function validate_api_key( $api_key ) {
 		// Initialize cURL
 		$ch = curl_init();
 
-		// Set the URL and headers
-		$url = 'https://api.mapbox.com/';
-		$headers = [ 'Authorization: Bearer ' . $api_key ];
+		// Set the URL
+		$url = 'https://api.mapbox.com/tokens/v2?access_token=' . urlencode($api_key);
 
 		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 		// Execute the cURL request
 		$response = curl_exec($ch);
+
+		// Check for cURL errors
+		if (curl_errno($ch)) {
+			$error_msg = 'cURL Error: ' . curl_error($ch);
+			curl_close($ch);
+			add_settings_error('mapbox_messages', 'mapbox_message', __($error_msg, 'default'), 'error');
+			return false;
+		}
 
 		// Check the response status code
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -178,8 +173,28 @@ class Multi_Vendor_Store_Admin {
 		curl_close($ch);
 
 		if ($http_code === 200) {
-			return true;
+			// Parse the JSON response
+			$data = json_decode($response, true);
+
+			// Check if the token is valid
+			if (isset($data['code']) && $data['code'] === 'TokenValid') {
+				add_settings_error('mapbox_messages', 'mapbox_message', __('API Key Saved Successfully.', 'default'), 'updated');
+				return true;
+			} elseif (isset($data['code']) && $data['code'] === 'TokenMalformed') {
+				add_settings_error('mapbox_messages', 'mapbox_message', __('Token is malformed.', 'default'), 'error');
+				return false;
+			} elseif (isset($data['code']) && $data['code'] === 'TokenExpired') {
+				add_settings_error('mapbox_messages', 'mapbox_message', __('Token has expired.', 'default'), 'error');
+				return false;
+			} elseif (isset($data['code']) && $data['code'] === 'TokenRevoked') {
+				add_settings_error('mapbox_messages', 'mapbox_message', __('Token has been revoked.', 'default'), 'error');
+				return false;
+			} else {
+				add_settings_error('mapbox_messages', 'mapbox_message', __('Unknown token error.', 'default'), 'error');
+				return false;
+			}
 		} else {
+			add_settings_error('mapbox_messages', 'mapbox_message', __('Error checking token validity.', 'default'), 'error');
 			return false;
 		}
 	}
@@ -202,7 +217,7 @@ class Multi_Vendor_Store_Admin {
 		if (!current_user_can('manage_options'))
 			return;
 
-		if (isset($_GET['settings-updated']))
+		if (isset($_GET['settings-updated']) && get_option('api_key_valid'))
 			add_settings_error('mapbox_messages', 'mapbox_message', __('Settings Saved', 'mapbox'), 'updated');
 
 		settings_errors('mapbox_messages');
@@ -243,29 +258,31 @@ class Multi_Vendor_Store_Admin {
 			)
 		);
 
-		add_settings_field(
-			'mapbox_version',
-			__('Mapbox Version', 'default'),
-			[$this, 'mapbox_field_version'],
-			'mapbox',
-			'mapbox_settings_section',
-			array(
-				'label_for'         => 'mapbox_version',
-				'class'             => 'mapbox_version'
-			)
-		);
+		if (get_option('api_key_valid')) {
+			add_settings_field(
+				'mapbox_version',
+				__('Mapbox Version', 'default'),
+				[$this, 'mapbox_field_version'],
+				'mapbox',
+				'mapbox_settings_section',
+				array(
+					'label_for'         => 'mapbox_version',
+					'class'             => 'mapbox_version'
+				)
+			);
 
-		add_settings_field(
-			'mapbox_style',
-			__('Mapbox Style', 'default'),
-			[$this, 'mapbox_field_style'],
-			'mapbox',
-			'mapbox_settings_section',
-			array(
-				'label_for'         => 'mapbox_field_style',
-				'class'             => 'mapbox_field_style'
-			)
-		);
+			add_settings_field(
+				'mapbox_style',
+				__('Mapbox Style', 'default'),
+				[$this, 'mapbox_field_style'],
+				'mapbox',
+				'mapbox_settings_section',
+				array(
+					'label_for'         => 'mapbox_field_style',
+					'class'             => 'mapbox_field_style'
+				)
+			);
+		}
 	}
 
 	public function mapbox_settings_section_cb($args) {
@@ -289,46 +306,42 @@ class Multi_Vendor_Store_Admin {
 			</option>
 
 			<option value="v3" <?php echo isset($options) ? (selected($options, "v3", false)) : (''); ?>>
-				<?php esc_html_e( 'Mapbox Version 3', 'default' ); ?>
+				<?php esc_html_e( 'Mapbox Version 3 Beta', 'default' ); ?>
 			</option>
 		</select>
 		<?php
 	}
 
 	public function mapbox_field_style($args) {
-		$styles = [
-			'street' => 'mapbox://styles/mapbox/streets-v11',
-			'outdoors' => 'mapbox://styles/mapbox/outdoors-v11',
-			'satellite-v11' => 'mapbox://styles/mapbox/satellite-streets-v11',
-			'satellite-v9' => 'mapbox://styles/mapbox/satellite-v9',
-			'Dark' => 'mapbox://styles/mapbox/dark-v10',
-			'Light' => 'mapbox://styles/mapbox/light-v10',
-			'navigation-preview-day' => 'mapbox://styles/mapbox/navigation-preview-day-v4',
-			'navigation-preview-night' => 'mapbox://styles/mapbox/navigation-preview-night-v4',
-			'Mapbox Standard Beta'=>'mapbox://styles/mapbox/standard-beta'
-		];
 
-		$stylesNew = [
+		$styles = [
 			'Mapbox Streets v12' => 'mapbox://styles/mapbox/streets-v12',
+			'Mapbox Streets v11' => 'mapbox://styles/mapbox/streets-v11',
 			'Mapbox Outdoors v12' => 'mapbox://styles/mapbox/outdoors-v12',
+			'Mapbox Outdoors v11' => 'mapbox://styles/mapbox/outdoors-v11',
 			'Mapbox Light v11' => 'mapbox://styles/mapbox/light-v11',
+			'Mapbox Light v10' => 'mapbox://styles/mapbox/light-v10',
 			'Mapbox Dark v11' => 'mapbox://styles/mapbox/dark-v11',
+			'Mapbox Dark v10' => 'mapbox://styles/mapbox/dark-v10',
 			'Mapbox Satellite v9' => 'mapbox://styles/mapbox/satellite-v9',
 			'Mapbox Satellite Streets v12' => 'mapbox://styles/mapbox/satellite-streets-v12',
+			'Mapbox Satellite Streets v11' => 'mapbox://styles/mapbox/satellite-streets-v11',
 			'Mapbox Navigation Day v1' => 'mapbox://styles/mapbox/navigation-day-v1',
+			'Mapbox Navigation Preview Day v4' => 'mapbox://styles/mapbox/navigation-preview-day-v4',
 			'Mapbox Navigation Night v1' => 'mapbox://styles/mapbox/navigation-night-v1',
+			'Mapbox Navigation Preview Night v4' => 'mapbox://styles/mapbox/navigation-preview-night-v4',
 		];
 
 		if ('v3' == get_option('mapbox_version')) {
 			$betaStyle = [ 'Mapbox Standard Beta' => 'mapbox://styles/mapbox/standard-beta' ];
-			$stylesNew = array_merge($betaStyle, $stylesNew);
+			$styles = array_merge($betaStyle, $styles);
 		}
 
 		$options = get_option('mapbox_field_style');
 		?>
 		<select id="<?php echo esc_attr($args['label_for']); ?>"  name="<?php echo esc_attr($args['label_for']); ?>">
 			<option value=""> --- Select a Style --- </option>
-			<?php foreach ($stylesNew as $key => $value) : ?>
+			<?php foreach ($styles as $key => $value) : ?>
 
 			<option value="<?php echo $value; ?>" <?php echo isset($options) ? (selected($options, $value, false)) : (''); ?>>
 				<?php echo $key; ?>
@@ -340,8 +353,18 @@ class Multi_Vendor_Store_Admin {
 	}
 
 	function save_mapbox_option_data() {
-		if ( isset( $_POST['mapbox_api_key'] ) )
-			update_option( 'mapbox_api_key', sanitize_text_field( $_POST['mapbox_api_key'] ) );
+		if ( isset( $_POST['mapbox_api_key'] ) ) {
+			// Perform the API key validation
+			$is_valid = $this->validate_api_key($_POST['mapbox_api_key']);
+
+			if ($is_valid) {
+				update_option('mapbox_api_key', sanitize_text_field($_POST['mapbox_api_key']));
+				update_option('api_key_valid', $is_valid);
+			} else {
+				update_option('mapbox_api_key', '');
+				update_option('api_key_valid', $is_valid);
+			}
+		}
 
 		if ( isset( $_POST['mapbox_version'] ) ) {
 			update_option('mapbox_version', sanitize_text_field($_POST['mapbox_version']));
@@ -402,7 +425,7 @@ class Multi_Vendor_Store_Admin {
 						}
 					}
 				}
-				// error_log("This is vendor : ".print_r($vendors, true));
+
 
 				foreach ($vendors as $vendor) {
 					$vendor_title = get_the_title($vendor);
